@@ -4,31 +4,6 @@ import collections
 import itertools
 import unittest
 
-import linked
-
-
-class Reducer():
-
-    def __init__(self, polymer):
-        self.polymer = polymer
-        self.head = linked.Double.from_list(polymer)
-
-    def run(self):
-        if self.head.next is None:
-            return False
-
-        if is_pair(self.head.value, self.head.next.value):
-            self.head = self.head.delete()
-            self.head = self.head.delete()
-
-            if self.head.prev is not None:
-                self.head = self.head.prev
-
-            return True
-
-        self.head = self.head.next
-        return True
-
 
 def read_input(filename):
     with open(filename) as fh:
@@ -40,22 +15,16 @@ def is_pair(a, b):
 
 
 def reduce(polymer):
-    r = Reducer(polymer)
-    while r.run():
-        pass
+    processed = []
+    for p in polymer:
+        if not processed:
+            processed.append(p)
+        elif is_pair(processed[-1], p):
+            processed.pop()
+        else:
+            processed.append(p)
 
-    while r.head.prev is not None:
-        r.head = r.head.prev
-
-    if r.head is None or r.head.value is None:
-        return []
-
-    reduced = [r.head.value]
-    while r.head.next is not None:
-        r.head = r.head.next
-        reduced.append(r.head.value)
-
-    return reduced
+    return processed
 
 
 class TestExample(unittest.TestCase):
