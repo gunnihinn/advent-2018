@@ -4,6 +4,31 @@ import collections
 import itertools
 import unittest
 
+import linked
+
+
+class Reducer():
+
+    def __init__(self, polymer):
+        self.polymer = polymer
+        self.head = linked.Double.from_list(polymer)
+
+    def run(self):
+        if self.head.next is None:
+            return False
+
+        if is_pair(self.head.value, self.head.next.value):
+            self.head = self.head.delete()
+            self.head = self.head.delete()
+
+            if self.head.prev is not None:
+                self.head = self.head.prev
+
+            return True
+
+        self.head = self.head.next
+        return True
+
 
 def read_input(filename):
     with open(filename) as fh:
@@ -14,41 +39,23 @@ def is_pair(a, b):
     return a != b and a.lower() == b.lower()
 
 
-def bad_indexes(polymer):
-    indexes = set()
-
-    i = 0
-    while i < len(polymer)-1:
-        if is_pair(polymer[i], polymer[i+1]):
-            indexes.add(i)
-            indexes.add(i+1)
-            i += 1
-        i += 1
-
-    return indexes
-
-
-def reduce_step(polymer):
-    ixs = bad_indexes(polymer)
-
-    return [ p for (i, p) in enumerate(polymer) if i not in ixs ]
-
-
 def reduce(polymer):
-    l = 0
-    while l != len(polymer):
-        l = len(polymer)
-        polymer = reduce_step(polymer)
+    r = Reducer(polymer)
+    while r.run():
+        pass
 
-    return polymer
+    while r.head.prev is not None:
+        r.head = r.head.prev
 
+    if r.head is None or r.head.value is None:
+        return []
 
-def polymer_types(polymer):
-    return set([ c.lower() for c in polymer ])
+    reduced = [r.head.value]
+    while r.head.next is not None:
+        r.head = r.head.next
+        reduced.append(r.head.value)
 
-
-def remove_type(polymer, t):
-    return [ a for a in polymer if a.lower() != t ]
+    return reduced
 
 
 class TestExample(unittest.TestCase):
