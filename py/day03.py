@@ -2,7 +2,6 @@
 
 import collections
 import itertools
-import unittest
 
 
 class Square():
@@ -69,39 +68,11 @@ def find_non_overlap(lines):
     return ids
 
 
-class TestExample(unittest.TestCase):
-
-    def test_square_from(self):
-        s = Square.from_line('#123 @ 3,2: 5x4')
-        self.assertEqual(s.id, 123)
-        self.assertEqual(s.x, 3)
-        self.assertEqual(s.y, 2)
-        self.assertEqual(s.w, 5)
-        self.assertEqual(s.h, 4)
-
-        self.assertEqual(len(list(s.squares())), 20)
-        self.assertEqual(len(set(x[0] for x in s.squares())), 5)
-
-    def test_overlap_count(self):
-        lines = [
-	    '#1 @ 1,3: 4x4',
-	    '#2 @ 3,1: 4x4',
-	    '#3 @ 5,5: 2x2',
-        ]
-
-        self.assertEqual(count_overlaps(lines), 4)
-
-    def test_non_overlap(self):
-        lines = [
-	    '#1 @ 1,3: 4x4',
-	    '#2 @ 3,1: 4x4',
-	    '#3 @ 5,5: 2x2',
-        ]
-
-        self.assertEqual(find_non_overlap(lines), set([3]))
+def run_a(filename):
+    lines = read_input(filename)
+    print(count_overlaps(lines))
 
 
-if __name__ == '__main__':
-    #unittest.main()
-    lines = read_input('inputs/input-03.txt')
+def run_b(filename):
+    lines = read_input(filename)
     print(find_non_overlap(lines))
