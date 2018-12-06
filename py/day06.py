@@ -1,3 +1,4 @@
+from collections import defaultdict
 import collections
 
 def run_a(filename):
@@ -6,7 +7,14 @@ def run_a(filename):
 
 
 def run_b(filename):
-    pass
+    points = parse(read_input(filename))
+    box = box_points(*corners(points))
+    area = 0
+    for p in box:
+        if total_distance(p, points) < 10000:
+            area += 1
+
+    print(area)
 
 
 def read_input(filename):
@@ -42,7 +50,7 @@ def boundary(points):
 
 
 def box_points(minX, maxX, minY, maxY):
-    return ( (x,y) for x in range(minX, maxX) for y in range(minY, maxY) )
+    return [ (x,y) for x in range(minX, maxX) for y in range(minY, maxY) ]
 
 
 def manhattan(x, y):
@@ -50,35 +58,51 @@ def manhattan(x, y):
 
 
 def claim(points):
-    pt_to_claim = collections.defaultdict(list)
+    pt_to_area = collections.defaultdict(int)
 
-    for pt in box_points(*corners(points)):
-        dist_to_pts = collections.defaultdict(list)
-        for p in points:
-            dist_to_pts[manhattan(p, pt)].append(p)
+    box = box_points(*corners(points))
 
-        m = min(dist_to_pts.keys())
-        if len(dist_to_pts[m]) == 1:
-            p = dist_to_pts[m][0]
-            pt_to_claim[p].append(pt)
+    for p in box:
+        distance = collections.defaultdict(list)
+        for q in points:
+            distance[manhattan(p, q)].append(q)
 
-    return pt_to_claim
+        m = min(distance.keys())
+        if len(distance[m]) == 1:
+            q = distance[m][0]
+            pt_to_area[q] += 1
+
+    return pt_to_area
 
 
 def smallest_area(points):
-    claims = claim(points)
+    areas = claim(points)
     pts = [ p for p in points if p not in set(boundary(points)) ]
-    pts.sort(key=lambda p: len(claims[p]))
+    pts.sort(key=lambda p: areas[p])
 
-    return len(claims[pts[0]])
+    return areas[pts[0]]
 
 
 def largest_area(points):
-    claims = claim(points)
+    areas = claim(points)
     pts = [ p for p in points if p not in set(boundary(points)) ]
-    pts.sort(key=lambda p: len(claims[p]), reverse=True)
+    pts.sort(key=lambda p: areas[p], reverse=True)
 
-    if pts[0] in boundary(points):
-        raise Exception('Got boundary point')
+    for p in pts[0:5]:
+        print(p, areas[p])
 
-    return len(claims[pts[0]])
+    return areas[pts[0]]
+
+
+def total_distance(p, points):
+    return sum(( manhattan(p, q) for q in points ))
+
+
+def total_area(points, limit):
+    box = box_points(*corners(points))
+    area = 0
+    for p in box:
+        if total_distance(p, points) < limit:
+            area += 1
+
+    return area

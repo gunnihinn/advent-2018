@@ -19,3 +19,12 @@ class TestExample(unittest.TestCase):
     def test_largest_area(self):
         points = [(1,1), (1,6), (8,3), (3,4), (5,5), (8,9)]
         self.assertEqual(largest_area(points), 17)
+
+    def test_total_distance(self):
+        points = [(1,1), (1,6), (8,3), (3,4), (5,5), (8,9)]
+        self.assertEqual(total_distance((4,3), points), 30)
+
+    def test_total_area(self):
+        points = [(1,1), (1,6), (8,3), (3,4), (5,5), (8,9)]
+        self.assertEqual(total_area(points, 32), 16)
+
