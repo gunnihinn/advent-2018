@@ -62,6 +62,19 @@ Step F must be finished before step E can begin.
         }
         self.assertEqual(find_no_deps(graph), set(['C']))
 
+    def test_find_orphans(self):
+        graph = {
+            'D': ['E'],
+            'F': ['E'],
+        }
+        self.assertEqual(find_orphans(graph, 'D'), set())
+
+    def test_find_orphans(self):
+        graph = {
+            'F': ['E'],
+        }
+        self.assertEqual(find_orphans(graph, 'F'), set(['E']))
+
     def test_linearize(self):
         graph = {
             'C': ['A', 'F'],

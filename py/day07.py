@@ -50,18 +50,38 @@ def find_no_deps(graph):
     return alpha
 
 
+def find_orphans(graph, task):
+    orphans = set(graph[task])
+
+    for k, vs in graph.items():
+        if k == task:
+            continue
+        else:
+            orphans.discard(k)
+            orphans.difference_update(vs)
+
+    return orphans
+
+
 def linearize(graph):
     available = find_no_deps(graph)
     lin = []
-    deps = None
 
-    while available and graph:
+    while available or graph:
         av = sorted(list(available))
         n = av[0]
 
         lin.append(n)
         available.remove(n)
-        deps = graph.pop(n)
+
+        if graph:
+            orphans = find_orphans(graph, n)
+            available.update(orphans)
+            graph.pop(n)
+            available.update(find_no_deps(graph))
+
+    return lin
+
 
         available.update(find_no_deps(graph))
 
