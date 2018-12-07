@@ -84,3 +84,17 @@ Step F must be finished before step E can begin.
             'F': ['E'],
         }
         self.assertEqual(linearize(graph), list('CABDFE'))
+
+    def test_linearize_work(self):
+        graph = {
+            'C': ['A', 'F'],
+            'A': ['B', 'D'],
+            'B': ['E'],
+            'D': ['E'],
+            'F': ['E'],
+        }
+        self.assertEqual(linearize_work(graph, 2, 0), 15)
+
+
+if __name__ == '__main__':
+    unittest.main()

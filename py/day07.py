@@ -10,7 +10,11 @@ def run_a(filename):
 
 
 def run_b(filename):
-    pass
+    with open(filename) as fh:
+        lines = fh.readlines()
+        graph = build_graph(parse(lines))
+        time = linearize_work(graph, 5, 60)
+        print(time)
 
 
 def parse(lines):
@@ -83,9 +87,73 @@ def linearize(graph):
     return lin
 
 
-        available.update(find_no_deps(graph))
+def linearize_work(graph, n_workers, padding):
+    available = {
+            task: None for task in find_no_deps(graph)
+    }
 
-    if deps:
-        lin += sorted(deps)
+    workers = [ Worker(padding) for _ in range(n_workers) ]
+    time = -1
 
-    return lin
+    while available or graph:
+        time += 1
+
+        for w in workers:
+            w.tick()
+
+        tasks = list(available.keys())
+        for task in tasks:
+            worker = available[task]
+            if worker is not None and worker.is_free():
+                del available[task]
+                if graph:
+                    orphans = find_orphans(graph, task)
+                    for o in orphans:
+                        if o not in available:
+                            available[o] = None
+
+                    graph.pop(task)
+                    orphans = find_no_deps(graph)
+                    for o in orphans:
+                        if o not in available:
+                            available[o] = None
+
+        free = [ w for w in workers if w.is_free() ]
+        if not free:
+            continue
+
+        av = sorted([
+            task for (task, worker) in available.items()
+            if worker is None
+        ])
+        for (w, task) in zip(free, av):
+            w.assign(task)
+            available[task] = w
+
+    while [ w for w in workers if not w.is_free() ]:
+        time += 1
+        for w in workers:
+            w.tick()
+
+    return time
+
+
+class Worker():
+
+    def __init__(self, padding=0):
+        self.task = 0
+        self.left = 0
+        self.padding = padding
+
+    def tick(self):
+        if self.left > 0:
+            self.left -= 1
+
+        return self.left
+
+    def assign(self, work):
+        self.task = work
+        self.left = ord(work) - ord('A') + 1 + self.padding
+
+    def is_free(self):
+        return self.left == 0
