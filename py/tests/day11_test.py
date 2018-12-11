@@ -12,14 +12,22 @@ class TestExample(unittest.TestCase):
 
     def test_square1(self):
         p = power(18)
-        self.assertEqual(square(p, 33, 45), 29)
+        s = square(p)
+        self.assertEqual(s(33, 45, 3), 29)
 
     def test_square2(self):
         p = power(42)
-        self.assertEqual(square(p, 21, 61), 30)
+        s = square(p)
+        self.assertEqual(s(21, 61, 3), 30)
 
     def test_max_square1(self):
-        self.assertEqual(max_square(18), (33, 45))
+        s = square(power(18))
+        self.assertEqual(max_square(s, 3), (33, 45))
 
     def test_max_square2(self):
-        self.assertEqual(max_square(42), (21, 61))
+        s = square(power(42))
+        self.assertEqual(max_square(s, 3), (21, 61))
+
+    def test_total_square1(self):
+        s = square(power(18))
+        self.assertEqual(total_square(s), (90, 269, 16))
