@@ -1,3 +1,4 @@
+from collections import defaultdict
 import time
 
 def run_a(filename):
@@ -6,61 +7,73 @@ def run_a(filename):
         (rules, plants) = parse(lines)
         print(tick_sum(rules, plants, 20))
 
+
 def run_b(filename):
     with open(filename) as fh:
         lines = fh.readlines()
         (rules, plants) = parse(lines)
         print(tick_sum(rules, plants, 50000000000))
 
+
+def print_b(n):
+    print('{:b}'.format(n))
+
+
 def tick(rules, plants, origin):
-    plants = plants << 5
-    origin += 5
+    m = 3 # m = max(( lowest_bit(r) for r in rules ))
+    plants = plants << m
+    origin += m
 
     ng = 0
-    m = highest_bit(plants)
-    for i in range(m+1):
-        plants >> 1
-        for rule in rules:
-            if (plants & rule) == rule:
-                ng |= 1 << i
+    i = m-1 # 5 - m?
+    while plants:
+        if plants & 31 in rules:
+            ng |= 1 << i
+        plants = plants >> 1
+        i += 1
 
     if ng == 0:
         return (ng, origin)
 
-    while not (ng & 1):
-        ng >> 1
+    while not ng & 1:
+        ng = ng >> 1
         origin -= 1
 
     return (ng, origin)
 
 
+def lowest_bit(n):
+    b = 0
+    while not n & 1:
+        b += 1
+        n = n >> 1
+
+    return b
+
+
 def highest_bit(n):
-    if n == 0:
-        return 0
+    b = 0
+    while n:
+        b += 1
+        n = n >> 1
 
-    m = 1
-    while 1 << m <= n:
-        if m == n:
-            return m
-        else:
-            m += 1
-
-    return m
+    return b
 
 
 def add(plants, origin):
     s = 0
-    for i in range(highest_bit(plants) + 1):
-        if plants & 1 << i:
+    i = 0
+    while plants:
+        if plants & 1:
             s += i - origin
+        plants = plants >> 1
+        i += 1
 
     return s
 
+
 def parse(lines):
-    plants = 0
-    for (i, p) in enumerate(lines[0][15:].strip()):
-        if p == '#':
-            plants |= 1 << i
+    plants = rule_to_number(lines[0][15:].strip())
 
     rules = []
     for line in lines[2:]:
@@ -68,46 +81,19 @@ def parse(lines):
         if line[-1] == '#':
             rules.append(rule_to_number(line[0:5]))
 
-    return (rules, plants)
-
-def first_set_bit(n):
-    if n == 0:
-        return 0
-
-    o = 0
-    while not n & 1 << o:
-        o += 1
-
-    return o
-
-
-def reverse(n):
-    if n == 0:
-        return 0
-
-    o = 1
-    while 1 << o <= n:
-        if 1 << o == n:
-            return n-1
-        elif 1 << o < n:
-            o += 1
-
-    return ~n + (1 << o)
+    return (set(rules), plants)
 
 
 def tick_sum(rules, plants, ticks):
     #import pdb; pdb.set_trace()
-    plants = reverse(plants)
-    origin = first_set_bit(plants)
+    origin = lowest_bit(plants)
 
-    a = time.time()
+    t = time.time()
     for i in range(0, ticks):
         (plants, origin) = tick(rules, plants, origin)
-        if i % 100000 == 0:
-            print(ticks - i, "left")
-            print("Have run for ", time.time() - a, "seconds")
 
-    plants = reverse(plants)
+        if i % 1000000 == 0:
+            print("{:d}/{:d} rounds done in {:02f} sec".format(i, ticks, time.time() - t))
 
     return add(plants, origin)
 
@@ -115,14 +101,6 @@ def rule_to_number(rule):
     b = 0
     for i in range(0, len(rule)):
         if rule[i] == '#':
-            b |= 1 << i
-
-    return b
-
-def to_number(part):
-    b = 0
-    for i in range(0, len(part)):
-        if part[i]:
             b |= 1 << i
 
     return b
