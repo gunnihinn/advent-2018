@@ -20,14 +20,17 @@ class TestExample(unittest.TestCase):
         s = square(p)
         self.assertEqual(s(21, 61, 3), 30)
 
+    @unittest.skip("This takes way too long")
     def test_max_square1(self):
         s = square(power(18))
         self.assertEqual(max_square(s, 3), (33, 45))
 
+    @unittest.skip("This takes way too long")
     def test_max_square2(self):
         s = square(power(42))
         self.assertEqual(max_square(s, 3), (21, 61))
 
+    @unittest.skip("This takes way too long")
     def test_total_square1(self):
         s = square(power(18))
         self.assertEqual(total_square(s), (90, 269, 16))
